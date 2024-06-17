@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
 # CLIP-ProCL: Unsupervised Domain Adaptive Semantic Segmentation Based on CLIP-guided Prototypical Contrastive Learning
 ## Overview
 ### Introduction
@@ -99,10 +97,3 @@ authors for making the source code publically available.
 * [SegFormer](https://github.com/NVlabs/SegFormer)
 * [DACS](https://github.com/vikolss/DACS)
 * [DAFormer](https://github.com/lhoyer/DAFormer)
-=======
-# CLIP-ProCL
->>>>>>> 0e48ad8a4eae9ac71522d219ea94e5d9069c6013
-=======
-# CLIP-ProCL
-code for paper xxx
->>>>>>> 8244e785f196f0cca164502a4a9c60349468528d
