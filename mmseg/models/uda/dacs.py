@@ -87,7 +87,6 @@ class DACS(UDADecorator):
         else:
             self.imnet_model = None
 
-
         # for prod strategy (CBC)
         self.pseudo_random_crop = cfg.get('pseudo_random_crop', False)
         self.crop_size = cfg.get('crop_size', (640, 640))
@@ -95,8 +94,9 @@ class DACS(UDADecorator):
         self.regen_pseudo = cfg.get('regen_pseudo', False)
         self.prod = cfg.get('prod', True)
 
+        # prompt learning
+        self.pl_flag = cfg.get('pl_flag', False)
         self.pl_weight = cfg.get('pl_weight', 1.0)
-
 
     def get_ema_model(self):
         return get_module(self.ema_model)
@@ -154,7 +154,6 @@ class DACS(UDADecorator):
                 DDP, it means the batch size on each GPU), which is used for
                 averaging the logs.
         """
-
         optimizer.zero_grad()
         log_vars = self(**data_batch)
         optimizer.step()
@@ -222,7 +221,7 @@ class DACS(UDADecorator):
         return image, gt_seg
 
     def prompt_learning(self, pred, gt):
-        pl_losses = self.pl_weight * cross_entropy(pred, gt.squeeze())
+        pl_losses = self.pl_weight * cross_entropy(pred, gt.squeeze(1), ignore_index=255)
         pl_loss, pl_log = self._parse_losses({'loss_pl': pl_losses})        
         return pl_loss, pl_log
 
@@ -273,9 +272,10 @@ class DACS(UDADecorator):
             img, img_metas, gt_semantic_seg, return_feat=True)
         src_feat = clean_losses.pop('features')
         clip_output = clean_losses.pop('clip_output')
-        pl_loss, pl_log = self.prompt_learning(clip_output, gt_semantic_seg)
-        pl_loss.backward()
-        log_vars.update(add_prefix(pl_log, 'src'))
+        if self.pl_flag:
+            pl_loss, pl_log = self.prompt_learning(clip_output, gt_semantic_seg)
+            pl_loss.backward()
+            log_vars.update(add_prefix(pl_log, 'src'))
 
         clean_loss, clean_log_vars = self._parse_losses(clean_losses)
         log_vars.update(clean_log_vars)
@@ -362,9 +362,10 @@ class DACS(UDADecorator):
             mixed_img, img_metas, mixed_lbl, pseudo_weight, return_feat=True)
         mix_losses.pop('features')
         mix_clip_output = mix_losses.pop('clip_output')
-        mix_pl_loss, mix_pl_log = self.prompt_learning(mix_clip_output, mixed_lbl)
-        mix_pl_loss.backward()
-        log_vars.update(add_prefix(mix_pl_log, 'mix'))
+        if self.pl_flag:
+            mix_pl_loss, mix_pl_log = self.prompt_learning(mix_clip_output, mixed_lbl)
+            mix_pl_loss.backward()
+            log_vars.update(add_prefix(mix_pl_log, 'mix'))
 
         mix_losses = add_prefix(mix_losses, 'mix')
         mix_loss, mix_log_vars = self._parse_losses(mix_losses)

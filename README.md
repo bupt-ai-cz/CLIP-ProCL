@@ -1,16 +1,19 @@
 # CLIP-ProCL: Unsupervised Domain Adaptive Semantic Segmentation Based on CLIP-guided Prototypical Contrastive Learning
+
 ## Overview
+
 ### Introduction
+
 Domain adaptive semantic segmentation aims to improve the model performance by bridging the gap existing between source and target domains. Recent works show that prototypical contrastive learning is a powerful approach. However, the prototypes can become unstable when there are significant variations in visual characteristics (e.g., color, scale and shape) among different images. Additionally, the prototypes generated from the source domain are highly correlated with domain information, which limits further gains in domain alignment. To address these issues, we propose a new method based on CLIP-guided Prototypical Contrastive Learning (CLIP-ProCL). Our approach simultaneously combines the rich text knowledge and image knowledge of CLIP to perform domain alignment. Towards the former, we obtain robust and domain-agnostic prototypes through the utilization of text prompts. Towards the latter, we leverage the image priors of CLIP to further guide the features learned by the segmentation network closer to the CLIP space. Experiments on the benchmark tasks GTA5 $\rightarrow$  Cityscapes and SYNTHIA $\rightarrow$ Cityscapes demonstrate that our approach outperforms the state-of-the-art methods.
 
 ![Framework](resources/framework.png)
 
 ### Result
 
-|        UDA  Scenarios         | mIoU-19 | mIoU-16 | mIoU-13 |
-| :---------------------------: | :-----: | :-----: | :-----: | 
-|      GTA5-to-Cityscapes       |  60.1   |    -    |    -    |
-|     SYNTHIA-to-Cityscapes     |    -    |  57.8   |  65.7   |
+|    UDA  Scenarios    | mIoU-19 | mIoU-16 | mIoU-13 |
+| :-------------------: | :-----: | :-----: | :-----: |
+|  GTA5-to-Cityscapes  |  60.1  |    -    |    -    |
+| SYNTHIA-to-Cityscapes |    -    |  57.8  |  65.7  |
 
 ### Setup Environment
 
@@ -33,7 +36,10 @@ pip install mmcv-full==1.3.7  # requires the other packages to be installed firs
 
 Please, download the checkpoint of [CLIP-ProCL on GTA→Cityscapes](https://drive.google.com/file/d/1QVSbS42cI9EkWf3IiCLuM7xA9ISKftVz/view?usp=sharing) and extract it to the folder `pretrained/`.
 
+Next, download the [CLIP](https://drive.google.com/file/d/1IsX_a8K4KGhHnrlO8Y56Qa6JJ6333vvL/view?usp=drive_link) checkpoint and extract it to the folder `clip/`.
+
 All experiments were executed on an NVIDIA RTX 3090.
+
 ### Setup Datasets
 
 **Cityscapes:** Please, download leftImg8bit_trainvaltest.zip and
@@ -80,7 +86,14 @@ python tools/convert_datasets/synthia.py data/synthia/ --nproc 8
 ```
 
 ## Training
-The training code will be updated soon!
+
+For convenience, we provide an [annotated config file](https://github.com/wanderHZ/CLIP-ProCL/blob/main/configs/clip_procl/gta2cs_resnet.py) of the final CLIP-ProCL.
+A training job can be launched using:
+
+```shell
+python run_experiments.py --config configs/clip_procl/gta2cs_resnet.py
+```
+
 ## Testing & Predictions
 
 The provided CLIP-ProCL checkpoint trained on GTA→Cityscapes can be tested on the
@@ -89,10 +102,12 @@ Cityscapes validation set using:
 ```shell
 sh test.sh pretrained/231025_1955_gta2cs_uda_warm_rcs_deeplabv2red_final_pl_8e0a4
 ```
+
 ## Acknowledgements
 
 This project is based on the following open-source projects. We thank their
 authors for making the source code publically available.
+
 * [MMSegmentation](https://github.com/open-mmlab/mmsegmentation)
 * [SegFormer](https://github.com/NVlabs/SegFormer)
 * [DACS](https://github.com/vikolss/DACS)

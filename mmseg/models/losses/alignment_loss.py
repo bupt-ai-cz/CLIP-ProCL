@@ -96,7 +96,6 @@ class AlignmentLoss(nn.Module):
     """
 
     def __init__(self,
-                 text_embedding_path,
                  use_avg_pool=False,
                  scale_min_ratio=0.75,
                  contrast_temp=1.,
@@ -112,9 +111,6 @@ class AlignmentLoss(nn.Module):
         self.loss_weight = loss_weight
         self.contrast_criterion = clip_contrastive
 
-        self.text_embedding = torch.load(text_embedding_path).cuda()
-
-
     def forward(self,
                 feat,
                 mask,
@@ -125,13 +121,12 @@ class AlignmentLoss(nn.Module):
         """Forward function."""
         # Parameters mean, covariance are sometimes required
         assert reduction_override in (None, 'none', 'mean', 'sum')
+        assert text_embedding_override is not None
         reduction = (
             reduction_override if reduction_override else self.reduction)
 
-        text_embedding = text_embedding_override if text_embedding_override is not None else self.text_embedding
-
         loss_alignment = self.loss_weight * self.contrast_criterion(
-            text_embedding,
+            text_embedding_override,
             feat,
             mask,
             weight=weight,
